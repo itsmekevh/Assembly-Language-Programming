@@ -1,0 +1,22 @@
+	AREA homework2, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+__main PROC
+	LDR r0, = 0x00000002; //loads 0x00000002 to Register 0 //
+	LDR r1, = 0xFFFFFFFF; //loads 0xFFFFFFFF to Register 1 //
+	LDR r2, = 0x00000004; //loads 0x00000004 to Register 2 //
+	LDR r3, = 0x00000001; //loads 0x00000001 to Register 3 //
+	
+	ADDS r4,r0,r2; // adds the least significant bits or words and stores result in r4 //
+	ADC r5,r1,r3; // adds the most significant bits or words and stores result in r5 //
+
+stop 	B stop
+	ENDP
+	END
+
+Results for Part 1:
+
+R4 = 0x00000006
+R5 = 0x00000000

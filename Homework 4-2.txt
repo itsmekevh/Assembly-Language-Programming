@@ -1,0 +1,52 @@
+	AREA homework4, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+
+	
+__main PROC
+	nop; 					// Creating array to be searched
+	LDR r0, =0x20004000; 			// Start address of array
+	MOV r1, #139; 				// Loading register 1 with value 139
+	MOV r2, #181; 				// Loading register 2 with value 181
+	MOV r3, #76; 				// Loading register 3 with value 76
+	MOV r4, #163; 				// Loading register 4 with value 163
+	MOV r5, #141;				// Loading register 5 with value 141
+	MOV r6, #217; 				// Loading register 6 with value 217
+	MOV r7, #155; 				// Loading register 7 with value 155
+	MOV r8, #4; 				// Loading register 8 with value 4
+	MOV r9, #166; 				// Loading register 9 with value 166
+	MOV r10, #58; 				// Loading register 10 with value 58
+	STM r0, {r1 - r10};			// Store all registers (r1 - r10) starting at memory location r0
+	LDR r1, =0xa; 				// Loading register r1 with the size of the array: 10 elements
+	MOV r2, #314;				// Loading R2 with number we are looking for 
+	BL searchArray;				// Call the function (return value will be written into R0, R1-R3 are overwritten here per ARM procedure calling convention)
+
+exit
+	
+stop 	B stop
+	ENDP
+
+searchArray PROC	
+	PUSH {R4}; 				// Preserving R4
+	LDR R3, =0; 				// Initializing R3 with the index to the start of array
+fetchCurrentElement
+	LDR R4, [R0, R3,LSL #2]; 		// Loading R4 with current element(index of array, R3) multiplied 4 bytes per element   
+	CMP R4, R2; 				// Comparing R4 (current element) with R2 (number we're looking for)
+	BEQ matchFound; 			// If equal then match found
+	ADD R3, #1; 				// Incrementing index of array by 1 to point to next element
+	CMP R3, R1; 				// Comparing R3 (current element index) with R1 (size of array) to see if there are any more elements 
+	BNE fetchCurrentElement; 		// If not equal then not done searching. Go back to fetchCurrentElement
+	MOV R0, #-1; 				// If not found, load R0 with -1 to show there is no matching element
+	B endSearch;				// Unconditional Branch to endSearch
+	
+matchFound
+	MOV R0, R3; 				// If match found, copy R3 into R0 to report matching index of array in return value register R0
+endSearch
+	POP {R4};				// Restore R4
+	BX LR;					// Exiting Subroutine, return to caller
+    ENDP
+	
+	
+	END

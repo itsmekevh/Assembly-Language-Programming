@@ -1,0 +1,25 @@
+	AREA homework2, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+S_BASE EQU 0x20008008;			Declaring S_BASE equal to 0x20008008
+	
+__main PROC
+	
+	LDR R0, =0x20008008;		Giving name to constant to make it easier to find where it is used in code to be changed if needed.
+	LDR R4, =0xFFFFFFFF;		Loading register R4 with value 0xFFFFFFFF (-1)
+	STR R4, [R0];			Storing value of R4 in memory located at the address in register R0
+	
+	LDR SP, =S_BASE;		Initializing the Stack Pointer register to S_BASE
+	LDR R1, =42;			Loading R1 with value 42
+	LDR R2, =99;			Loading R2 with value 99
+	PUSH {R1,R2};			Here, R2 is pushed to 0x20008004 and R1 is pushed to 0x20008000
+	POP {R6,R7};			Stack is empty now since the value of the stack pointer is S_BASE again
+	POP {R8};			Pops from stack to R8 causing Stack Underflow because there were no values to pop 
+
+exit
+	
+stop 	B stop
+	ENDP
+	END

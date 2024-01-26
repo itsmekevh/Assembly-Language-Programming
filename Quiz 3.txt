@@ -1,0 +1,34 @@
+	AREA Quiz3, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+__main PROC
+	;// Insert Step 3 code here
+	LDR R12, = 0xABCDEF01; // Loading R12 with 0xABCDEF01
+	LDR R4, = 0xE000ED14;  // Loading R4 with CCR address 0xE000ED14
+	LDR R5, [R4];		   // Loading Memory content at address R4 into R5
+	ORR R5, 0x10;		   // Setting bit 4 to 1
+	STR R5, [R4];		   // Storing back R5 into memory location R4
+	
+	;// Insert Step 2 code here
+	LDR R0, =0x1; 		   // Setting dividend to 1
+	LDR R1, =0x0;		   // Setting divisor to 0
+	SDIV R2, R0, R1;	   // Signed division with 1 by 0
+	
+
+
+	
+stop 	B stop
+	ENDP	
+	;// Insert Step 4 code here
+HardFault_Handler PROC
+	EXPORT HardFault_Handler
+	MOV R9, #0; 		   // Dummy instruction for breakpoint
+	;// Insert Step 5 code here
+	LDR R4, = 0xE000ED2A;  // Loading R4 with Usage Fault Status register address
+	LDR R8, [R4];		   // Loading R8 with Usage Fault Status Register content 
+trap B trap
+	ENDP
+
+	END

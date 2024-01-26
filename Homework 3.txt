@@ -1,0 +1,61 @@
+Problem 1:	
+	AREA homework3, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+__main PROC
+	LDR r0, = 0xAABBCCDD; //loads 0xAABBCCDD to Register 0 
+	LDR r1, = 0x20004000; //loads 0x20004000 to Register 1 
+	STR r0, [r1, #0];  //Stores R0 into R1 with 0 offset 
+	LDR r2, = 0xFF00FF00; //Creating Mask
+	AND r2,r0, r2; // Apply mask to extract AA and CC (0xAA00CC00)
+	EOR r0, r2, r0; // Exclusive OR original with result of mask to get BB and DD (0x00BB00DD)
+	ROR r2, r2, #24; //Rotate r2 by 3 bytes to the right to get 0x00CC00AA
+	ROR r0, r0, #8; // Rotate r0 by 1 bytes to the right to get 0xDD00BB00
+	ORR r0, r0, r2; // OR r0 with r2 to get end result 0xDDCCBBAA 
+	STR r0, [r1, #0]; // Stores r0 in memory location r1 (0x20004000) with 0 offset
+
+stop 	B stop
+	ENDP
+	END
+
+
+
+
+
+Problem 2:
+	AREA homework3, CODE
+	EXPORT __main
+	ALIGN
+	ENTRY
+	
+__main PROC
+	MOV r1, #0x1; // Loading register 1 with value 1
+	MOV r2, #0x2; // Loading register 2 with value 2
+	MOV r3, #0x3; // Loading register 3 with value 3
+	MOV r4, #0x4; // Loading register 4 with value 4
+	MOV r5, #0x5; // Loading register 5 with value 5
+	MOV r6, #0x6; // Loading register 6 with value 6
+	MOV r7, #0x7; // Loading register 7 with value 7
+	MOV r8, #0x8; // Loading register 8 with value 8
+	MOV r9, #0x9; // Loading register 9 with value 9
+	MOV r10, #0xA; // Loading register 10 with value 10
+	LDR r11, =0x20004000; //Start address of array
+	STM r11, {r1 - r10};//Store all registers (r1 - r10) starting at memory location r11
+	LDR r0, =0x0; // Initialize the sum to 0.
+	LDR r12, =0xa; // Initialize counter 'i' to the number of array elements to add (10)
+_loop 
+	CMP r12, #0x0; //Comparing r12 (loop counter 'i') with 0
+	BEQ _endloop; //Branch to end loop if zero flag is set
+	LDR r1, [r11], #4; //Post indexing to get i'th data from memory
+	ADD r0, r1; //adds i'th data retrieved to sum stored in r0
+	SUB r12, #1; //Decrements counter by 1 for each iteration
+	B _loop; //Branch back to top of loop
+	
+_endloop
+	B _endloop; //end of program
+
+stop 	B stop
+	ENDP
+	END

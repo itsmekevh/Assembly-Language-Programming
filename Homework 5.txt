@@ -1,0 +1,124 @@
+								----------Question 1-----------	
+	AREA Homework5Q1, CODE
+	EXPORT __main
+	ALIGN 4
+	ENTRY
+	
+__main PROC
+
+			;// Preparing test data for algorithm
+			LDR R0, = 0xE000E010; 			// Specifying a memory address to store data 
+			LDR R1, = 0x1; 				// Data to be stored into memory address
+			STR R1, [R0];				// Storing R1 to memory address in R0
+			LDR R1, = 0x0; 				// Loading R1 with 0
+			;// Beginning of algorithm	
+			LDR R0, = 0xE000E010;			// Specifying memory address to load data from	
+			LDR R1, [R0];				// Getting data from memory at address in R0
+			LDR R0, =0x0; 				// Loading R0 with 0 (int r0 = 0)
+			LDR R2, =0x0; 				// Start of Counter  (int i = 0)
+
+loopT			CMP  R2, #32;  				// i < 32; Comparing R2 with 32 to see if need to exit loop (top of loop)
+			BGE  exitLoop; 				// Exit loop if loop continue condition fails
+			LSL R3, R1, R2;				// R3 = Copy of R1 logically shifted left by amount in R2 (i) (R3 = R1 << i)
+			ORR R0, R3;				// R0 = old value of R0 bitwise OR'd with R1 << i
+			ADD R2, #1;				// Incrementing R2 by 1 (i++)
+			B loopT;				// Unconditional Branch to top of loop
+exitLoop
+	
+stop 	B stop
+	ENDP	
+
+	END
+
+
+
+
+								----------Question 2-----------
+	AREA Homework5Q2, CODE
+	EXPORT __main
+	ALIGN 
+	ENTRY
+	
+__main PROC
+	;// Setup fractions a/b + c/d
+	;// R1 = a, R2 = b, R3 = c, R4 = d
+
+	;// R5    (a*d + b*c)
+	;// -- = ------------- 
+	;// R6        b*d
+	
+	;// R6 = b*d
+	;// (if R6 = 0 issue hard fault exception)
+	;// R0 = -1
+	;// R1 = a*d
+	;// R3 = b*c
+	;// R5 = R1 + R3
+	;// HardFault_Handler 
+	;// R0 = -1
+	
+	LDR R4, = 0xE000ED14;					// Loading R4 with CCR address 0xE000ED14
+	LDR R5, [R4];							// Loading Memory content at address R4 into R5
+	ORR R5, 0x10;							// Setting bit 4 to 1
+	STR R5, [R4];							// Storing back R5 into memory location R4
+	
+	;// Test case #1: 4/3 + 5/6 = 39/18
+	
+	LDR R1, =4;								// Loading R1 with value 4
+	LDR R2, =3;								// Loading R1 with value 3
+	LDR R3, =5;								// Loading R1 with value 5
+	LDR R4, =6;								// Loading R1 with value 6
+	LDR R0, =1;								// Loading R1 with value 1
+	MUL R6, R2, R4;							// Multiplying R2 with R4 and putting result into R6 (b*d)
+	SDIV R5, R6, R6;						
+	LDR R7, = 0xE000ED14;					// Turning Divide by zero exception back on
+	LDR R8, [R7];							// Turning Divide by zero exception back on
+	ORR R8, 0x10;		   					// Turning Divide by zero exception back on
+	STR R8, [R7];							// Turning Divide by zero exception back on		   
+	CMP R0, -1;								// Quitting if Divide by zero occured, if R0 = -1, go to stop
+	BEQ stop
+	MUL R1, R1, R4;							// Multiplying R1 with R4 and putting result into R1 (a*d)
+	MUL R3, R3, R2;							// Multiplying R1 with R4 and putting result into R1 (b*c)
+	ADD R5, R1, R3;							// Adding R1 and R3 and putting result into R5 ((a*d)+(b*c))
+	
+	;// Test case #2: 4/0 + 5/6 => Divide by zero exception occurs
+	
+	LDR R1, =4;								// Loading R1 with value 4
+	LDR R2, =0;								// Loading R1 with value 0
+	LDR R3, =5;								// Loading R1 with value 5
+	LDR R4, =6;								// Loading R1 with value 6
+	LDR R0, =1;								// Loading R1 with value 1
+	MUL R6, R2, R4;							// Multiplying R2 with R4 and putting result into R6 (b*d)
+	SDIV R5, R6, R6;						// Dividing R6 with R6 and storeing it in R5 (To check divide by zero exception)
+	LDR R7, = 0xE000ED14;					// Turning Divide by zero exception back on
+	LDR R8, [R7];							// Turning Divide by zero exception back on
+	ORR R8, 0x10;							// Turning Divide by zero exception back on
+	STR R8, [R7];							// Turning Divide by zero exception back on
+	CMP R0, -1;								// Comparing R0 with -1, if equal, go to stop
+	BEQ stop
+	
+	;// With this test case, these next 3 lines are not expected to run
+	MUL R1, R1, R4;							
+	MUL R3, R3, R2;
+	ADD R5, R1, R3;
+stop 	B stop
+	ENDP
+
+
+HardFault_Handler PROC
+	EXPORT HardFault_Handler
+	LDR R0, = 0xE000ED2A;  					// Loading R4 with Usage Fault Status register address
+	LDR R9, [R0];		   					// Loading R8 with Usage Fault Status Register content
+	LDR R0, = -1;							// Loading R0 with -1 to indicate divide by zero occured
+	STR R0, [SP];		   					// Storing -1 into Stack pointer
+	LDR R0, = 0xE000ED14;  					// Turning off Divide by zero exception in order get past faulting instruction
+	LDR R1, [R0];		   					// Loading Memory content at address R4 into R5
+	AND R1, 0xFFFFFFEF;	   					// Clear bit 4 to 0
+	STR R1, [R0];							// Storing R0 into R1
+	BX LR
+	
+	ENDP
+		
+	END
+
+
+
